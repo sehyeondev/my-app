@@ -3,9 +3,14 @@ import Link from 'next/link'
 function Home() {
   return (
     <ul>
+    <li>
+        <Link href="/form/create">
+          <a>Go to create page</a>
+        </Link>
+      </li>
       <li>
         <Link href="/form/abc">
-          <a>Go to pages/post/[pid].js</a>
+          <a>Go to pages/form/[pid].js</a>
         </Link>
       </li>
       <li>
@@ -15,7 +20,7 @@ function Home() {
       </li>
       <li>
         <Link href="/form/abc/a-comment">
-          <a>Go to pages/post/[pid]/[comment].js</a>
+          <a>Go to pages/form/[pid]/[comment].js</a>
         </Link>
       </li>
     </ul>

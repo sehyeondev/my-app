@@ -1,14 +1,17 @@
 import { useState } from 'react'
 import {v4 as uuidv4} from 'uuid'
+import styles from '../../styles/Home.module.css'
 
 export default function Create() {
-  const [questions, setQuestions] = useState([]) 
+  const [questions, setQuestions] = useState([])
+  const [title, setTitle] = useState("Untitled form")
+  const [desc, setDesc] = useState("")
 
   class SelectOption {
     constructor() {
       this.uuid = uuidv4();
-      this.title = "default option title";
-      this.desc = "default option description"
+      this.title = "";
+      this.desc = ""
     }
   }
 
@@ -16,13 +19,13 @@ export default function Create() {
     constructor(qType) {
       this.uuid = uuidv4();
       this.qType = qType;
-      this.title = "default title";
-      this.desc = "default description";
+      this.title = "";
+      this.desc = "";
       this.selectOptions = [
         new SelectOption()
       ];
-      this.text = "default text"
-      this.longText = "default long text"
+      this.text = ""
+      // this.longText = "default long text"
     }
   }
 
@@ -95,17 +98,17 @@ export default function Create() {
     setQuestions(cp)
   }
 
-  const updateLongText = (longText, key) => {
-    const cp = [...questions]
-    cp.find(ele => ele.uuid === key).longText = longText
-    setQuestions(cp)
-  }
-
   // outer format of creat page
   return (
-    <div>
-      <div>
-      <div> Let's create forms! </div>
+    // <html style={{backgroundColor: "purple", height: "100vh"}}>
+    <div className={styles.page}>
+      <div className={styles.formTitle}> {title} </div>
+
+      <div className={styles.info}>
+        <div className={styles.solidBar}></div>
+        <input className={styles.title} placeholder='Form title' value={title} onChange={e => setTitle(e.target.value)}/>
+        <input className={styles.desc} placeholder='Form description' value={desc} onChange={e => setDesc(e.target.value)}/>
+      </div>
 
       {
         questions.map((question, index) => {
@@ -119,17 +122,16 @@ export default function Create() {
             addSelectOption={addSelectOption}
             updateOptionTitle={updateOptionTitle}
             updateOptionDesc={updateOptionDesc}
-            deletSelectOption={deleteSelectOption}
+            deleteSelectOption={deleteSelectOption}
             updateText={updateText}
-            updateLongText={updateLongText}
             />
         })
       }
       <br/>
 
-      <button onClick= {e => addQuestion()}>add</button>
-      </div>
+      <button className={styles.addBtn} onClick= {e => addQuestion()}>add</button>
     </div>
+    // </html>
   )
 }
 
@@ -143,77 +145,63 @@ const QuestionBox = ({
   addSelectOption, 
   updateOptionTitle,
   updateOptionDesc, 
-  deletSelectOption,
-  updateText,
-  updateLongText}) => {
-  return <div>
+  deleteSelectOption,
+  updateText}) => {
+  return <div className={styles.question}>
     {/* common area for all qTypes */}
-    <br/> 
-    <div>{question.qType} - {question.title} - {question.desc}</div>
-    <select value={question.qType} onChange={e => updateQType(e.target.value, question.uuid)}>
+    {/* <div>{question.qType} - {question.title} - {question.desc}</div> */}
+    <div>
+    <input className={styles.title} placeholder='Question Title' value={question.title} onChange={e => updateQTitle(e.target.value, question.uuid)}/>
+    <select className={styles.select} value={question.qType} onChange={e => updateQType(e.target.value, question.uuid)}>
       <option value="checkbox">checkbox</option>
       <option value="radio">radio</option>
       <option value="text">text</option>
       <option value="longText">long text</option>
     </select>
+    <button className={styles.delete} onClick={e => deleteQuestion(question.uuid)}>delete</button>
+    </div>
+    {/* <input placeholder='Question Description' value={question.desc} onChange={e => updateQDesc(e.target.value, question.uuid)}/> */}
+    
 
-    <input placeholder='title' value={question.title} onChange={e => updateQTitle(e.target.value, question.uuid)}/>
-    <input placeholder='description' value={question.desc} onChange={e => updateQDesc(e.target.value, question.uuid)}/>
-    <button onClick={e => deleteQuestion(question.uuid)}>delete</button>
-    <br/>
-
-    {/* qType: checkbox */}
+    {/* qType: checkbox or radio*/}
     {
-      (question.qType === "checkbox") &&
-      question.selectOptions.map((option, index) => {
-        return <div key={option.uuid}>
-          <br/>
-          <div> {option.title} - {option.desc} </div>
-          <input type="checkbox" id={option.uuid} value={option.title} name = "option"/>
-          <label for={option.uuid}>{option.title}</label>
-          <br/>
-          <input placeholder='option title' value={option.title} onChange={e => updateOptionTitle(e.target.value, question.uuid, option.uuid)}/>
-          <input placeholder='option description' value={option.desc} onChange={e => updateOptionDesc(e.target.value, question.uuid, option.uuid)}/>
-          <button onClick={e => deletSelectOption(question.uuid, option.uuid)}>delete option</button>
-        </div>
-      })
-    }
-
-    {/* qType: radio */}
-    {
-      (question.qType === "radio") &&
-      question.selectOptions.map((option, index) => {
-        return <div key={option.uuid}>
-          <br/>
-          <div> {option.title} - {option.desc} </div>
-          <input type="radio" id={option.uuid} value={option.title} name = "option"/>
-          <label for={option.uuid}>{option.title}</label>
-          <br/>
-          <input placeholder='option title' value={option.title} onChange={e => updateOptionTitle(e.target.value, question.uuid, option.uuid)}/>
-          <input placeholder='option description' value={option.desc} onChange={e => updateOptionDesc(e.target.value, question.uuid, option.uuid)}/>
-          <button onClick={e => deletSelectOption(question.uuid, option.uuid)}>delete option</button>
-        </div>
-      })
-    }
-
-    {/* qType: text */}
-    {
-      (question.qType === "text") &&
-      <div>
-          <div> {question.text} </div>
-          <input placeholder='text' value={question.text} onChange={e => updateText(e.target.value, question.uuid)}/>
+      ((question.qType === "checkbox") || (question.qType === "radio"))  &&
+      <div className={styles.optionContainer}>
+        {question.selectOptions.map((option, index) => {
+          return (
+            <Option qType={question.qType} uuid={option.uuid} title={option.title} desc={option.desc} question={question} 
+                            updateOptionDesc={updateOptionDesc} updateOptionTitle={updateOptionTitle} deleteSelectOption={deleteSelectOption} />
+          )
+        })}
+        <button className={styles.addOption} onClick={e => addSelectOption(question.uuid)}>add option</button>
       </div>
+    }
+
+    {/* qType: text or longText*/}
+    {
+      ((question.qType === "text") || (question.qType === "longText")) &&
+      <Text question={question} updateText={updateText} />
     }
     
-    {/* qType: longText */}
-    {
-      (question.qType === "longText") &&
-      <div>
-          <div> {question.longText} </div>
-          <textarea placeholder='text' value={question.longText} onChange={e => updateLongText(e.target.value, question.uuid)}/>
-      </div>
-    }
-    <button onClick={e => addSelectOption(question.uuid)}>add option</button>
-    <br/>
+    
   </div>
+}
+
+function Option(props){
+  return (
+    <div className={styles.option}>
+      <input className={styles.optionBtn} type={props.qType} name = "option"/>
+      <input className={styles.optionTitle} placeholder='Option Title' value={props.title} onChange={e => props.updateOptionTitle(e.target.value, props.question.uuid, props.uuid)}/>
+      {/* <input className={styles.desc} placeholder='Option Description' value={props.desc} onChange={e => props.updateOptionDesc(e.target.value, props.question.uuid, props.uuid)}/> */}
+      <button className={styles.optionDelete} onClick={e => props.deleteSelectOption(props.question.uuid, props.uuid)}>X</button>
+    </div>
+  )
+}
+
+function Text(props){
+  return (
+    <div>
+      <textarea placeholder={props.question.qType} value={props.question.text} onChange={e => props.updateText(e.target.value, props.question.uuid)}/>
+    </div>
+  )
 }
